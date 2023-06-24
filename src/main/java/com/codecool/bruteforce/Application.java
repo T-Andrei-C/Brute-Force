@@ -13,6 +13,7 @@ import com.codecool.bruteforce.users.repository.UserRepository;
 import com.codecool.bruteforce.users.repository.UserRepositoryImpl;
 
 import java.util.List;
+import java.util.Random;
 
 public class Application {
 
