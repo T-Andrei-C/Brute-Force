@@ -3,10 +3,8 @@ package com.codecool.bruteforce.users.repository;
 import com.codecool.bruteforce.logger.Logger;
 import com.codecool.bruteforce.users.model.User;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserRepositoryImpl implements UserRepository {
@@ -38,26 +36,27 @@ public class UserRepositoryImpl implements UserRepository {
     public void add(String userName, String password) {
         String sql = "INSERT INTO Users(user_name, password) VALUES(?,?)";
 
-        try (Connection conn = this.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, userName);
-            pstmt.setString(2, password);
-            pstmt.executeUpdate();
+        try {
+            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+            preparedStatement.setString(1, userName);
+            preparedStatement.setString(2, password);
+
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
     public void update(int id, String userName, String password) {
-        String sql = "UPDATE Users SET user_name = ?, "
-                + "password = ? WHERE id = ?";
+        String sql = "UPDATE Users SET user_name = ?, " + "password = ? WHERE id = ?";
 
-        try (Connection conn = this.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, userName);
-            pstmt.setString(2, password);
-            pstmt.setInt(3, id);
-            pstmt.executeUpdate();
+        try {
+            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+            preparedStatement.setString(1, userName);
+            preparedStatement.setString(2, password);
+            preparedStatement.setInt(3, id);
+
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -66,10 +65,11 @@ public class UserRepositoryImpl implements UserRepository {
     public void delete(int id) {
         String sql = "DELETE FROM Users WHERE id = ?";
 
-        try (Connection conn = this.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
+        try {
+            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+            preparedStatement.setInt(1, id);
+
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -78,19 +78,43 @@ public class UserRepositoryImpl implements UserRepository {
     public void deleteAll() {
         String sql = "DELETE FROM Users";
 
-        try (Connection conn = this.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.executeUpdate();
+        try  {
+            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
     public User get(int id) {
+        String sql = "SELECT * FROM Users WHERE id = ?";
+
+        try  {
+            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+            preparedStatement.setInt(1, id);
+
+            ResultSet result =  preparedStatement.executeQuery();
+            return new User(id, result.getString("user_name"), result.getString("password"));
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
         return null;
     }
 
     public List<User> getAll() {
+        String sql = "SELECT * FROM Users";
+        try {
+            ResultSet resultSet = getConnection().prepareStatement(sql).executeQuery();
+            List<User> users = new ArrayList<>();
+            while (resultSet.next()){
+                users.add(new User(resultSet.getInt("id"),
+                        resultSet.getString("user_name"),
+                        resultSet.getString("password")));
+            }
+            return users;
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
         return null;
     }
 }
