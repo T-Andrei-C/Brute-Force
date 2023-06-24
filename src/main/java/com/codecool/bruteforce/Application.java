@@ -27,11 +27,12 @@ public class Application {
         String dbFile = "src/main/resources/Users.db";
 
         UserRepository userRepository = new UserRepositoryImpl(dbFile, logger);
-        userRepository.deleteAll();
-        userRepository.add("Hhhh", "123");
-        userRepository.add("sss", "123");
-        userRepository.add("aaa", "123");
-        System.out.println(userRepository.getAll());
+
+//        userRepository.deleteAll();
+//        userRepository.add("Hhhh", "123");
+//        userRepository.add("sss", "123");
+//        userRepository.add("aaa", "123");
+//        System.out.println(userRepository.getAll());
         List<PasswordGenerator> passwordGenerators = createPasswordGenerators();
         UserGenerator userGenerator = new UserGeneratorImpl(logger, passwordGenerators);
         int userCount = 10;
