@@ -1,6 +1,7 @@
 package com.codecool.bruteforce;
 
 import com.codecool.bruteforce.authentication.AuthenticationService;
+import com.codecool.bruteforce.logger.ConsoleLogger;
 import com.codecool.bruteforce.logger.Logger;
 import com.codecool.bruteforce.passwords.breaker.PasswordBreakerImpl;
 import com.codecool.bruteforce.passwords.generator.PasswordGenerator;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class Application {
 
-    private static Logger logger = null;
+    private static Logger logger = new ConsoleLogger();
 
     private static final AsciiTableRange lowercaseChars = new AsciiTableRange(97, 122);
     private static final AsciiTableRange uppercaseChars = new AsciiTableRange(65, 90);
@@ -23,11 +24,14 @@ public class Application {
 
     public static void main(String[] args) {
 
-        String dbFile = "src/resources/Users.db";
+        String dbFile = "src/main/resources/Users.db";
 
         UserRepository userRepository = new UserRepositoryImpl(dbFile, logger);
-        userRepository.deleteAll();
-
+//        userRepository.deleteAll();
+//        userRepository.add("Hhhh", "123");
+//        userRepository.add("sss", "123");
+//        userRepository.add("aaa", "123");
+        userRepository.update(2, "lklklk", "updated");
         List<PasswordGenerator> passwordGenerators = createPasswordGenerators();
         UserGenerator userGenerator = new UserGeneratorImpl(logger, passwordGenerators);
         int userCount = 10;
@@ -50,7 +54,7 @@ public class Application {
     private static List<PasswordGenerator> createPasswordGenerators() {
         var lowercasePwGen = new PasswordGeneratorImpl(lowercaseChars);
         var uppercasePwGen = new PasswordGeneratorImpl(lowercaseChars, uppercaseChars);
-        PasswordGenerator numbersPwGen = null; // lowercase + uppercase + numbers
+        PasswordGenerator numbersPwGen = new PasswordGeneratorImpl(lowercaseChars, uppercaseChars, numbers); // lowercase + uppercase + numbers
 
         return List.of(lowercasePwGen, uppercasePwGen, numbersPwGen);
     }
