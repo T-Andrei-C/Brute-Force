@@ -1,6 +1,7 @@
 package com.codecool.bruteforce;
 
 import com.codecool.bruteforce.authentication.AuthenticationService;
+import com.codecool.bruteforce.authentication.AuthenticationServiceImpl;
 import com.codecool.bruteforce.logger.ConsoleLogger;
 import com.codecool.bruteforce.logger.Logger;
 import com.codecool.bruteforce.passwords.breaker.PasswordBreakerImpl;
@@ -9,6 +10,7 @@ import com.codecool.bruteforce.passwords.generator.PasswordGeneratorImpl;
 import com.codecool.bruteforce.passwords.model.AsciiTableRange;
 import com.codecool.bruteforce.users.generator.UserGenerator;
 import com.codecool.bruteforce.users.generator.UserGeneratorImpl;
+import com.codecool.bruteforce.users.model.User;
 import com.codecool.bruteforce.users.repository.UserRepository;
 import com.codecool.bruteforce.users.repository.UserRepositoryImpl;
 
@@ -28,12 +30,8 @@ public class Application {
         String dbFile = "src/main/resources/Users.db";
 
         UserRepository userRepository = new UserRepositoryImpl(dbFile, logger);
+        userRepository.deleteAll();
 
-//        userRepository.deleteAll();
-//        userRepository.add("Hhhh", "123");
-//        userRepository.add("sss", "123");
-//        userRepository.add("aaa", "123");
-//        System.out.println(userRepository.getAll());
         List<PasswordGenerator> passwordGenerators = createPasswordGenerators();
         UserGenerator userGenerator = new UserGeneratorImpl(logger, passwordGenerators);
         int userCount = 10;
@@ -43,14 +41,16 @@ public class Application {
 
         logger.logInfo(String.format("Database initialized with %d users; maximum password length: %d%n", userCount, maxPwLength));
 
-        AuthenticationService authenticationService = null;
+        AuthenticationService authenticationService = new AuthenticationServiceImpl(userRepository);
+
         //breakUsers(userCount, maxPwLength, authenticationService);
 
     }
 
-    private static void addUsersToDb(int count, int maxPwLength, UserGenerator userGenerator,
-                                     UserRepository userRepository)
-    {
+    private static void addUsersToDb(int count, int maxPwLength, UserGenerator userGenerator, UserRepository userRepository) {
+        for (User user : userGenerator.generate(count, maxPwLength)){
+            userRepository.add(user.userName(), user.password());
+        }
     }
 
     private static List<PasswordGenerator> createPasswordGenerators() {
