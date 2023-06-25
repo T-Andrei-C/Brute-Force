@@ -11,11 +11,11 @@ import com.codecool.bruteforce.passwords.model.AsciiTableRange;
 import com.codecool.bruteforce.users.generator.UserGenerator;
 import com.codecool.bruteforce.users.generator.UserGeneratorImpl;
 import com.codecool.bruteforce.users.model.User;
+import com.codecool.bruteforce.users.repository.CrackedUserRepositoryImpl;
 import com.codecool.bruteforce.users.repository.UserRepository;
 import com.codecool.bruteforce.users.repository.UserRepositoryImpl;
 
 import java.util.List;
-import java.util.Random;
 
 public class Application {
 
@@ -27,15 +27,19 @@ public class Application {
 
     public static void main(String[] args) {
 
-        String dbFile = "src/main/resources/Users.db";
+        String dbFileUsers = "src/main/resources/Users.db";
+        String dbFileCrackedUsers = "src/main/resources/CrackedUsers.db";
 
-        UserRepository userRepository = new UserRepositoryImpl(dbFile, logger);
+        UserRepository userRepository = new UserRepositoryImpl(dbFileUsers, logger);
+        CrackedUserRepositoryImpl crackedUserRepository = new CrackedUserRepositoryImpl(dbFileCrackedUsers, logger);
+
+        crackedUserRepository.deleteAll();
         userRepository.deleteAll();
 
         List<PasswordGenerator> passwordGenerators = createPasswordGenerators();
         UserGenerator userGenerator = new UserGeneratorImpl(logger, passwordGenerators);
         int userCount = 10;
-        int maxPwLength = 3;
+        int maxPwLength = 4;
 
         addUsersToDb(userCount, maxPwLength, userGenerator, userRepository);
 
@@ -43,7 +47,7 @@ public class Application {
 
         AuthenticationService authenticationService = new AuthenticationServiceImpl(userRepository);
 
-        breakUsers(userCount, maxPwLength, authenticationService);
+        breakUsers(userCount, maxPwLength, authenticationService, crackedUserRepository);
 
     }
 
@@ -61,7 +65,7 @@ public class Application {
         return List.of(lowercasePwGen, uppercasePwGen, numbersPwGen);
     }
 
-    private static void breakUsers(int userCount, int maxPwLength, AuthenticationService authenticationService) {
+    private static void breakUsers(int userCount, int maxPwLength, AuthenticationService authenticationService, CrackedUserRepositoryImpl crackedUserRepository) {
         var passwordBreaker = new PasswordBreakerImpl();
         logger.logInfo("Initiating password breaker...\n");
         for (int i = 1; i <= userCount; i++) {
@@ -81,6 +85,7 @@ public class Application {
                         long endTime = System.currentTimeMillis();
                         long elapsedTime = endTime - startTime;
                         logger.logInfo("User password guessed correctly in " + elapsedTime);
+                        crackedUserRepository.add(user, elapsedTime);
                         broken = true;
                         break;
                     }
@@ -92,7 +97,5 @@ public class Application {
             }
         }
     }
-
-
 
 }

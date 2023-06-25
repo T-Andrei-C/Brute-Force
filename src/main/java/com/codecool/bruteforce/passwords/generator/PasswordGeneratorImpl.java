@@ -17,7 +17,7 @@ public class PasswordGeneratorImpl implements PasswordGenerator {
     @Override
     public String generate(int length) {
         String randomPassword = "";
-        for (int i = 0; i <= length; i++) {
+        for (int i = 0; i < length; i++) {
             randomPassword += getRandomCharacter(getRandomCharacterSet());
         }
 
