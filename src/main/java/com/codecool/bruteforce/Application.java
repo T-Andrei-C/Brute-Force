@@ -35,7 +35,7 @@ public class Application {
         List<PasswordGenerator> passwordGenerators = createPasswordGenerators();
         UserGenerator userGenerator = new UserGeneratorImpl(logger, passwordGenerators);
         int userCount = 10;
-        int maxPwLength = 4;
+        int maxPwLength = 3;
 
         addUsersToDb(userCount, maxPwLength, userGenerator, userRepository);
 
@@ -43,7 +43,7 @@ public class Application {
 
         AuthenticationService authenticationService = new AuthenticationServiceImpl(userRepository);
 
-        //breakUsers(userCount, maxPwLength, authenticationService);
+        breakUsers(userCount, maxPwLength, authenticationService);
 
     }
 
@@ -64,9 +64,8 @@ public class Application {
     private static void breakUsers(int userCount, int maxPwLength, AuthenticationService authenticationService) {
         var passwordBreaker = new PasswordBreakerImpl();
         logger.logInfo("Initiating password breaker...\n");
-
         for (int i = 1; i <= userCount; i++) {
-            String user = "user" + i;
+            String user = "User" + i;
             for (int j = 1; j <= maxPwLength; j++) {
                 logger.logInfo(String.format("Trying to break %s with all possible password combinations with length = %d...%n", user, j));
 
@@ -74,15 +73,17 @@ public class Application {
                 long startTime = System.currentTimeMillis();
 
                 // Get all pw combinations
-                String[] pwCombinations = new String[0];
+                List<String> pwCombinations = passwordBreaker.getCombinations(j);
                 boolean broken = false;
 
                 for (String pw : pwCombinations) {
-                    // Try to authenticate the current user with pw
-                    // If successful, stop measuring time, and print the pw and the elapsed time to the console, then go to next user
-
-                    long endTime = System.currentTimeMillis();
-                    long elapsedTime = endTime - startTime;
+                    if (authenticationService.authenticate(user, pw)){
+                        long endTime = System.currentTimeMillis();
+                        long elapsedTime = endTime - startTime;
+                        logger.logInfo("User password guessed correctly in " + elapsedTime);
+                        broken = true;
+                        break;
+                    }
                 }
 
                 if (broken) {

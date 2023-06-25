@@ -9,11 +9,13 @@ import java.util.List;
 
 public class UserRepositoryImpl implements UserRepository {
     private final String dbFile;
+    private Connection connection = null;
     private Logger logger;
 
     public UserRepositoryImpl(String dbFile, Logger logger) {
         this.dbFile = dbFile;
         this.logger = logger;
+        this.connection = getConnection();
     }
 
     private Connection getConnection() {
@@ -37,7 +39,7 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "INSERT INTO Users(user_name, password) VALUES(?,?)";
 
         try {
-            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, userName);
             preparedStatement.setString(2, password);
 
@@ -51,7 +53,7 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "UPDATE Users SET user_name = ?, " + "password = ? WHERE id = ?";
 
         try {
-            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, userName);
             preparedStatement.setString(2, password);
             preparedStatement.setInt(3, id);
@@ -66,7 +68,7 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "DELETE FROM Users WHERE id = ?";
 
         try {
-            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
 
             preparedStatement.executeUpdate();
@@ -79,7 +81,7 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "DELETE FROM Users";
 
         try  {
-            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -90,7 +92,7 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "SELECT * FROM Users WHERE id = ?";
 
         try  {
-            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
 
             ResultSet result =  preparedStatement.executeQuery();
@@ -104,7 +106,7 @@ public class UserRepositoryImpl implements UserRepository {
     public List<User> getAll() {
         String sql = "SELECT * FROM Users";
         try {
-            ResultSet resultSet = getConnection().prepareStatement(sql).executeQuery();
+            ResultSet resultSet = connection.prepareStatement(sql).executeQuery();
             List<User> users = new ArrayList<>();
             while (resultSet.next()){
                 users.add(new User(resultSet.getInt("id"),
