@@ -38,8 +38,8 @@ public class Application {
 
         List<PasswordGenerator> passwordGenerators = createPasswordGenerators();
         UserGenerator userGenerator = new UserGeneratorImpl(logger, passwordGenerators);
-        int userCount = 10;
-        int maxPwLength = 4;
+        int userCount = 5;
+        int maxPwLength = 3;
 
         addUsersToDb(userCount, maxPwLength, userGenerator, userRepository);
 
@@ -84,7 +84,7 @@ public class Application {
                     if (authenticationService.authenticate(user, pw)){
                         long endTime = System.currentTimeMillis();
                         long elapsedTime = endTime - startTime;
-                        logger.logInfo("User password guessed correctly in " + elapsedTime);
+                        logger.logInfo("User password guessed correctly in " + elapsedTime + " milliseconds");
                         crackedUserRepository.add(user, elapsedTime);
                         broken = true;
                         break;
